@@ -1,0 +1,86 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: skirmshop-drive-s3-to-drive
+  labels:
+    app.kubernetes.io/name: skirmshop-drive-mirror
+    app.kubernetes.io/component: s3-to-drive
+spec:
+  schedule: "*/15 * * * *"
+  timeZone: Europe/Madrid
+  suspend: false
+  concurrencyPolicy: Forbid
+  startingDeadlineSeconds: 600
+  successfulJobsHistoryLimit: 3
+  failedJobsHistoryLimit: 5
+  jobTemplate:
+    spec:
+      backoffLimit: 1
+      activeDeadlineSeconds: 7200
+      ttlSecondsAfterFinished: 604800
+      template:
+        metadata:
+          labels:
+            app.kubernetes.io/name: skirmshop-drive-mirror
+            app.kubernetes.io/component: s3-to-drive
+          annotations:
+            backup.velero.io/backup-volumes-excludes: mirror,rclone-config,google-token,scripts
+        spec:
+          restartPolicy: Never
+          nodeSelector:
+            kubernetes.io/arch: amd64
+            kubernetes.io/hostname: ubuntu
+            topology: lan
+          containers:
+            - name: rclone
+              image: rclone/rclone:1.69.0
+              imagePullPolicy: IfNotPresent
+              command: ["sh", "/app/s3-to-drive-sync.sh"]
+              envFrom:
+                - configMapRef:
+                    name: skirmshop-drive-s3-config
+              env:
+                - name: AWS_ACCESS_KEY_ID
+                  valueFrom:
+                    secretKeyRef:
+                      name: skirmshop-drive-s3-app
+                      key: AWS_ACCESS_KEY_ID
+                - name: AWS_SECRET_ACCESS_KEY
+                  valueFrom:
+                    secretKeyRef:
+                      name: skirmshop-drive-s3-app
+                      key: AWS_SECRET_ACCESS_KEY
+              volumeMounts:
+                - name: scripts
+                  mountPath: /app/s3-to-drive-sync.sh
+                  subPath: s3-to-drive-sync.sh
+                  readOnly: true
+                - name: google-token
+                  mountPath: /var/run/google
+                  readOnly: true
+                - name: mirror
+                  mountPath: /mirror
+                - name: rclone-config
+                  mountPath: /config/rclone
+              resources:
+                requests:
+                  cpu: 100m
+                  memory: 256Mi
+                limits:
+                  memory: 1Gi
+          volumes:
+            - name: scripts
+              configMap:
+                name: skirmshop-drive-mirror-scripts
+                defaultMode: 0755
+            - name: google-token
+              secret:
+                secretName: gmail-backup-secrets
+                items:
+                  - key: GMAIL_TOKEN_JSON
+                    path: token.json
+            - name: mirror
+              persistentVolumeClaim:
+                claimName: skirmshop-drive-mirror
+            - name: rclone-config
+              emptyDir: {}

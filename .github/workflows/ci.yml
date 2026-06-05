@@ -1,0 +1,41 @@
+name: ci
+
+on:
+  push:
+    branches:
+      - main
+      - deploy/prod
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  manifests:
+    name: Validate Kubernetes manifests
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup kubectl
+        uses: azure/setup-kubectl@v4
+        with:
+          version: v1.32.5
+
+      - name: Render kustomize
+        run: kubectl kustomize k8s > rendered.yaml
+
+      - name: Client-side apply validation
+        run: kubectl apply --dry-run=client --validate=false -f rendered.yaml
+
+      - name: Schema validation
+        run: |
+          docker run --rm \
+            -v "$PWD:/work" \
+            ghcr.io/yannh/kubeconform:v0.6.7 \
+            -summary \
+            -strict \
+            -ignore-missing-schemas \
+            /work/rendered.yaml

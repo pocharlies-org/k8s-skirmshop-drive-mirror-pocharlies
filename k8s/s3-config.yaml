@@ -1,0 +1,17 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: skirmshop-drive-s3-config
+  labels:
+    app.kubernetes.io/name: skirmshop-drive-mirror
+    app.kubernetes.io/component: s3-config
+data:
+  S3_BUCKET: "skirmshop-drive"
+  S3_REGION: "us-east-1"
+  S3_ENDPOINT: "http://skirmshop-drive-s3.backup-hub.svc.cluster.local:9000"
+  S3_TO_DRIVE_DEST: "skirmshop/k8s-object-store"
+  S3_TO_DRIVE_ARCHIVE: "skirmshop/k8s-object-store-archive"
+  S3_TO_DRIVE_MODE: "copy"
+  S3_TO_DRIVE_TRANSFERS: "4"
+  S3_TO_DRIVE_CHECKERS: "8"
+  S3_TO_DRIVE_BWLIMIT: "8M"

@@ -1,0 +1,21 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: skirmshop-drive-mirror-config
+  labels:
+    app.kubernetes.io/name: skirmshop-drive-mirror
+    app.kubernetes.io/component: config
+data:
+  DRIVE_SOURCE: ""
+  DRIVE_ROOT_FOLDER_ID: ""
+  RCLONE_MODE: "sync"
+  RCLONE_DRY_RUN: "false"
+  RCLONE_TRANSFERS: "8"
+  RCLONE_CHECKERS: "16"
+  RCLONE_BWLIMIT: "off"
+  RCLONE_FILTER_RULES: |
+    - /skirmshop/k8s-object-store/**
+    - /skirmshop/k8s-object-store-archive/**
+    + /Facturas/**
+    + /skirmshop/**
+    - **

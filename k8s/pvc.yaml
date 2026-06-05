@@ -1,0 +1,14 @@
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: skirmshop-drive-mirror
+  labels:
+    app.kubernetes.io/name: skirmshop-drive-mirror
+    app.kubernetes.io/component: storage
+spec:
+  accessModes:
+    - ReadWriteMany
+  storageClassName: nfs-cold
+  resources:
+    requests:
+      storage: 500Gi

@@ -1,0 +1,32 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+namespace: backup-hub
+
+resources:
+  - pvc.yaml
+  - configmap.yaml
+  - s3-config.yaml
+  - s3-minio.yaml
+  - s3-bootstrap.yaml
+  - s3-to-drive-cronjob.yaml
+  - keeper.yaml
+  - cronjob.yaml
+
+configMapGenerator:
+  - name: skirmshop-drive-mirror-scripts
+    files:
+      - drive-sync.sh
+      - s3-to-drive-sync.sh
+  - name: skirmshop-drive-s3-policy
+    files:
+      - s3-policy.json
+
+generatorOptions:
+  disableNameSuffixHash: true
+
+labels:
+  - includeSelectors: false
+    pairs:
+      app.kubernetes.io/managed-by: gitops
+      app.kubernetes.io/part-of: skirmshop
