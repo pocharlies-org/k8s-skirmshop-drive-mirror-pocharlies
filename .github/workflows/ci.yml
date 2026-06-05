@@ -27,9 +27,6 @@ jobs:
       - name: Render kustomize
         run: kubectl kustomize k8s > rendered.yaml
 
-      - name: Client-side apply validation
-        run: kubectl apply --dry-run=client --validate=false -f rendered.yaml
-
       - name: Schema validation
         run: |
           docker run --rm \
