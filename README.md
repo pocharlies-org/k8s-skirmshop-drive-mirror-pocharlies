@@ -10,6 +10,7 @@ The stack uses:
 - PVC `skirmshop-drive-mirror`
 - `rclone/rclone` CronJob
 - internal MinIO service `skirmshop-drive-s3`
+- LAN MinIO API and console routes for operators
 - S3-to-Drive export CronJob `skirmshop-drive-s3-to-drive`
 - existing Kubernetes Secret `backup-hub/gmail-backup-secrets`
 - a tiny keeper Deployment so Velero filesystem backups always see the PVC
@@ -72,6 +73,11 @@ Cluster services can write to the LAN-only S3 endpoint:
 - addressing: path-style / MinIO-compatible
 - Kubernetes Secret: `backup-hub/skirmshop-drive-s3-app`
 
+Operators can inspect the same bucket from LAN/Tailscale:
+
+- S3 API: `https://skirmshop-s3.lan.e-dani.com`
+- Console: `https://skirmshop-s3-console.lan.e-dani.com`
+
 The app Secret has also been copied to namespace `skirmshop` for store
 workloads. Secrets are intentionally not stored in these manifests; recreate or
 rotate them with `kubectl create secret generic ... --dry-run=client -o yaml |
@@ -94,3 +100,9 @@ minutes:
 Use this for documents, generated files, imports, exports and other artifacts
 that should be durable in Drive. It is not intended for hot databases or
 high-IO application state.
+
+See:
+
+- `docs/s3-architecture.md` for the application contract and prefix standard.
+- `docs/storage-audit-2026-06-07.md` for the first audit of Skirmbooks,
+  socialmedia, video, Brain/RAG and Shopify plugin storage usage.

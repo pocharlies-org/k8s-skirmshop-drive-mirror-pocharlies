@@ -8,6 +8,7 @@ resources:
   - configmap.yaml
   - s3-config.yaml
   - s3-minio.yaml
+  - s3-lan-ingressroute.yaml
   - s3-bootstrap.yaml
   - s3-to-drive-cronjob.yaml
   - keeper.yaml

@@ -46,6 +46,8 @@ spec:
                 secretKeyRef:
                   name: skirmshop-drive-s3-root
                   key: MINIO_ROOT_PASSWORD
+            - name: MINIO_BROWSER_REDIRECT_URL
+              value: https://skirmshop-s3-console.lan.e-dani.com
           ports:
             - name: s3
               containerPort: 9000
