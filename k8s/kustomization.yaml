@@ -23,6 +23,7 @@ configMapGenerator:
   - name: skirmshop-drive-s3-policy
     files:
       - s3-policy.json
+      - s3-lifecycle.json
 
 generatorOptions:
   disableNameSuffixHash: true

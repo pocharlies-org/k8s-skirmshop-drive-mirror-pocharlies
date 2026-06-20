@@ -1,0 +1,34 @@
+{
+  "Rules": [
+    {
+      "Expiration": {
+        "Days": 7
+      },
+      "ID": "dgx-openclaw-image-ephemeral-7d",
+      "Filter": {
+        "Prefix": "media/images/openclaw/ephemeral/"
+      },
+      "Status": "Enabled"
+    },
+    {
+      "Expiration": {
+        "Days": 7
+      },
+      "ID": "dgx-openclaw-image-legacy-ephemeral-2026-06-7d",
+      "Filter": {
+        "Prefix": "media/images/2026-06/openclaw-ephemeral-"
+      },
+      "Status": "Enabled"
+    },
+    {
+      "Expiration": {
+        "Days": 7
+      },
+      "ID": "dgx-image-studio-ephemeral-7d",
+      "Filter": {
+        "Prefix": "media/images/studio/ephemeral/"
+      },
+      "Status": "Enabled"
+    }
+  ]
+}
