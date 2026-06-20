@@ -79,11 +79,29 @@ Use stable prefixes so Drive exports remain browsable:
 | Catalog/RAG source files | `catalog/rag/source/` |
 | Catalog/RAG reports | `catalog/rag/reports/` |
 | Generated images | `media/images/` |
+| OpenClaw ephemeral images | `media/images/openclaw/ephemeral/` |
+| OpenClaw legacy ephemeral images | `media/images/2026-06/openclaw-ephemeral-` |
+| DGX Image Studio ephemeral images | `media/images/studio/ephemeral/` |
 | Generated videos | `media/videos/` |
 | Generated audio | `media/audio/` |
 | Social media attachments | `socialmedia/attachments/` |
 | Social media avatars | `socialmedia/avatars/` |
 | Plugin-owned artifacts | `plugins/<plugin-name>/` |
+
+## Lifecycle rules
+
+The bootstrap job imports the complete MinIO lifecycle configuration from
+`k8s/s3-lifecycle.json`. The following generated-image prefixes expire after 7
+days:
+
+| Rule ID | Prefix | Expiry |
+| --- | --- | --- |
+| `dgx-openclaw-image-ephemeral-7d` | `media/images/openclaw/ephemeral/` | 7 days |
+| `dgx-openclaw-image-legacy-ephemeral-2026-06-7d` | `media/images/2026-06/openclaw-ephemeral-` | 7 days |
+| `dgx-image-studio-ephemeral-7d` | `media/images/studio/ephemeral/` | 7 days |
+
+Applications use object-level metadata to describe retention, but bucket
+lifecycle is owned by this bootstrap job with MinIO root credentials.
 
 ## Operator examples
 

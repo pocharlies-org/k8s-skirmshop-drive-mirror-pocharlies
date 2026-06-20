@@ -2,6 +2,8 @@ apiVersion: batch/v1
 kind: Job
 metadata:
   name: skirmshop-drive-s3-bootstrap
+  annotations:
+    argocd.argoproj.io/sync-options: Force=true,Replace=true
   labels:
     app.kubernetes.io/name: skirmshop-drive-mirror
     app.kubernetes.io/component: s3-bootstrap
@@ -39,6 +41,9 @@ spec:
               mc admin user add local "${AWS_ACCESS_KEY_ID}" "${AWS_SECRET_ACCESS_KEY}" || true
               mc admin policy attach local skirmshop-drive-rw --user "${AWS_ACCESS_KEY_ID}"
               mc admin user info local "${AWS_ACCESS_KEY_ID}"
+
+              mc ilm rule import "local/${S3_BUCKET}" < /config/s3-lifecycle.json
+              mc ilm rule list --expiry "local/${S3_BUCKET}"
           envFrom:
             - configMapRef:
                 name: skirmshop-drive-s3-config
@@ -67,6 +72,10 @@ spec:
             - name: policy
               mountPath: /config/s3-policy.json
               subPath: s3-policy.json
+              readOnly: true
+            - name: policy
+              mountPath: /config/s3-lifecycle.json
+              subPath: s3-lifecycle.json
               readOnly: true
           resources:
             requests:
