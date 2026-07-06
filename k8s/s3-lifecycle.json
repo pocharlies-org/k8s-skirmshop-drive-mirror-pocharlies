@@ -4,6 +4,16 @@
       "Expiration": {
         "Days": 7
       },
+      "ID": "tts-audio-ephemeral-7d",
+      "Filter": {
+        "Prefix": "media/audio/"
+      },
+      "Status": "Enabled"
+    },
+    {
+      "Expiration": {
+        "Days": 7
+      },
       "ID": "dgx-openclaw-image-ephemeral-7d",
       "Filter": {
         "Prefix": "media/images/openclaw/ephemeral/"
