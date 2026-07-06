@@ -23,7 +23,10 @@ spec:
         topology: lan
       containers:
         - name: mc
-          image: minio/mc:RELEASE.2025-04-16T18-13-26Z
+          # RELEASE.2025-04-16 broke against MinIO server 2025-04-22 ("Content-Length"
+          # error on `mc anonymous set`) — pinned to the mc that passed the full
+          # bootstrap incl. ilm import on 2026-07-06.
+          image: minio/mc@sha256:a7fe349ef4bd8521fb8497f55c6042871b2ae640607cf99d9bede5e9bdf11727
           imagePullPolicy: IfNotPresent
           command:
             - sh
