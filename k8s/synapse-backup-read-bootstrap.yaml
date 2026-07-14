@@ -1,0 +1,153 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: skirmshop-drive-synapse-backup-read-v2-bootstrap
+  labels:
+    app.kubernetes.io/name: skirmshop-drive-mirror
+    app.kubernetes.io/component: synapse-backup-read-bootstrap
+  annotations:
+    argocd.argoproj.io/hook: PostSync
+    argocd.argoproj.io/hook-delete-policy: BeforeHookCreation
+    argocd.argoproj.io/sync-wave: "2"
+spec:
+  backoffLimit: 2
+  activeDeadlineSeconds: 900
+  ttlSecondsAfterFinished: 604800
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: skirmshop-drive-mirror
+        app.kubernetes.io/component: synapse-backup-read-bootstrap
+    spec:
+      automountServiceAccountToken: false
+      restartPolicy: Never
+      nodeSelector:
+        kubernetes.io/arch: amd64
+      securityContext:
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+        - name: bootstrap-and-canary
+          image: minio/mc@sha256:a7fe349ef4bd8521fb8497f55c6042871b2ae640607cf99d9bede5e9bdf11727
+          imagePullPolicy: IfNotPresent
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop: ["ALL"]
+          command:
+            - sh
+            - -ec
+            - |
+              expect_denied() {
+                label="$1"
+                shift
+                output="/tmp/${label}.out"
+                if "$@" >"${output}" 2>&1; then
+                  if [ "${label}" = put-object ]; then
+                    mc rm --force "root/${S3_BUCKET}/${DENIED_WRITE_OBJECT}" >/dev/null 2>&1 || true
+                  fi
+                  echo "ERROR: ${label} unexpectedly succeeded" >&2
+                  return 1
+                fi
+                if ! grep -Eiq 'Access Denied|AccessDenied|Forbidden|not authorized|insufficient permission' "${output}"; then
+                  echo "ERROR: ${label} failed for a reason other than authorization" >&2
+                  sed -n '1,20p' "${output}" >&2
+                  return 1
+                fi
+                echo "PASS: ${label} denied"
+              }
+
+              until mc alias set root "${S3_ENDPOINT}" "${MINIO_ROOT_USER}" "${MINIO_ROOT_PASSWORD}" >/dev/null; do
+                echo "waiting for MinIO..."
+                sleep 5
+              done
+
+              mc mb --ignore-existing "root/${S3_BUCKET}"
+              mc anonymous set none "root/${S3_BUCKET}"
+              mc admin policy create root "${READ_POLICY_NAME}" /config/synapse-backup-read-policy.json
+              mc admin user add root "${READ_ACCESS_KEY_ID}" "${READ_SECRET_ACCESS_KEY}"
+              mc admin user enable root "${READ_ACCESS_KEY_ID}"
+              mc admin policy attach root "${READ_POLICY_NAME}" --user "${READ_ACCESS_KEY_ID}"
+
+              # Root creates deterministic, non-sensitive probes. The read-only
+              # identity must read the target bucket and nothing else.
+              printf 'synapse-backup-read-v2-canary\n' >/tmp/readonly-probe.txt
+              mc cp /tmp/readonly-probe.txt "root/${S3_BUCKET}/${READ_CANARY_OBJECT}" >/dev/null
+              mc mb --ignore-existing "root/${AUTHZ_CANARY_BUCKET}"
+              mc anonymous set none "root/${AUTHZ_CANARY_BUCKET}"
+              mc cp /tmp/readonly-probe.txt "root/${AUTHZ_CANARY_BUCKET}/sentinel.txt" >/dev/null
+
+              mc alias set readonly "${S3_ENDPOINT}" "${READ_ACCESS_KEY_ID}" "${READ_SECRET_ACCESS_KEY}" >/dev/null
+
+              # Positive canaries: ListBucket/GetBucketLocation and GetObject.
+              mc ls "readonly/${S3_BUCKET}" >/dev/null
+              test "$(mc cat "readonly/${S3_BUCKET}/${READ_CANARY_OBJECT}")" = "synapse-backup-read-v2-canary"
+              echo "PASS: target bucket list/get"
+
+              # Negative canaries: no writes, deletes, or access to another bucket.
+              expect_denied put-object mc cp /tmp/readonly-probe.txt "readonly/${S3_BUCKET}/${DENIED_WRITE_OBJECT}"
+              expect_denied delete-object mc rm "readonly/${S3_BUCKET}/${READ_CANARY_OBJECT}"
+              expect_denied other-bucket-list mc ls "readonly/${AUTHZ_CANARY_BUCKET}"
+              expect_denied other-bucket-get mc cat "readonly/${AUTHZ_CANARY_BUCKET}/sentinel.txt"
+
+              echo "PASS: Synapse backup v2 identity is read-only for ${S3_BUCKET}"
+          env:
+            - name: MC_CONFIG_DIR
+              value: /tmp/.mc
+            - name: S3_ENDPOINT
+              valueFrom:
+                configMapKeyRef:
+                  name: skirmshop-drive-s3-config
+                  key: S3_ENDPOINT
+            - name: S3_BUCKET
+              valueFrom:
+                configMapKeyRef:
+                  name: skirmshop-drive-s3-config
+                  key: S3_BUCKET
+            - name: READ_POLICY_NAME
+              value: skirmshop-drive-synapse-backup-ro-v2
+            - name: READ_CANARY_OBJECT
+              value: .authz-canary/synapse-backup-read-v2.txt
+            - name: DENIED_WRITE_OBJECT
+              value: .authz-canary/denied-write-v2.txt
+            - name: AUTHZ_CANARY_BUCKET
+              value: skirmshop-drive-authz-canary
+            - name: MINIO_ROOT_USER
+              valueFrom:
+                secretKeyRef:
+                  name: skirmshop-drive-s3-root
+                  key: MINIO_ROOT_USER
+            - name: MINIO_ROOT_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: skirmshop-drive-s3-root
+                  key: MINIO_ROOT_PASSWORD
+            - name: READ_ACCESS_KEY_ID
+              valueFrom:
+                secretKeyRef:
+                  name: skirmbooks-backup-s3-read-v2
+                  key: AWS_ACCESS_KEY_ID
+            - name: READ_SECRET_ACCESS_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: skirmbooks-backup-s3-read-v2
+                  key: AWS_SECRET_ACCESS_KEY
+          volumeMounts:
+            - name: policy
+              mountPath: /config/synapse-backup-read-policy.json
+              subPath: synapse-backup-read-policy.json
+              readOnly: true
+            - name: tmp
+              mountPath: /tmp
+          resources:
+            requests:
+              cpu: 50m
+              memory: 64Mi
+            limits:
+              memory: 256Mi
+      volumes:
+        - name: policy
+          configMap:
+            name: skirmshop-drive-s3-policy
+        - name: tmp
+          emptyDir: {}

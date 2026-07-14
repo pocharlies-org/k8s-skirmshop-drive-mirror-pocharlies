@@ -10,7 +10,9 @@ resources:
   - s3-minio.yaml
   - s3-lan-ingressroute.yaml
   - s3-app-externalsecret.yaml
+  - synapse-backup-read-externalsecret.yaml
   - s3-bootstrap.yaml
+  - synapse-backup-read-bootstrap.yaml
   - s3-to-drive-cronjob.yaml
   - keeper.yaml
   - cronjob.yaml
@@ -24,6 +26,7 @@ configMapGenerator:
     files:
       - s3-policy.json
       - s3-lifecycle.json
+      - synapse-backup-read-policy.json
 
 generatorOptions:
   disableNameSuffixHash: true
