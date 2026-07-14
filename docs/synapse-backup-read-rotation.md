@@ -20,6 +20,8 @@ that first requires a complete prefix, ownership and retention inventory.
    `skirmbooks-backup-s3-read-v2` ExternalSecret to be Ready and for the
    PostSync bootstrap Job to pass all five authorization canaries: target
    list/get, denied put, denied delete and denied access to the other bucket.
+   The bootstrap is constrained to the `ks5-nvme` node pool; it must not be
+   scheduled on Ubuntu or Sauvage.
 3. Keep the legacy Secret and user enabled. Merge the coordinated Synapse PR,
    which projects the same Vault generation into `synapse` and switches only
    the existing CronJob reference to the v2 Secret.

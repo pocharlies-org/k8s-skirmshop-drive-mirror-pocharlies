@@ -22,7 +22,7 @@ spec:
       automountServiceAccountToken: false
       restartPolicy: Never
       nodeSelector:
-        kubernetes.io/arch: amd64
+        node-pool: ks5-nvme
       securityContext:
         seccompProfile:
           type: RuntimeDefault

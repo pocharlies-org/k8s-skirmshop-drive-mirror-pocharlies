@@ -41,6 +41,8 @@ for required in (
 ):
     assert required in bootstrap, required
 assert "kubernetes.io/hostname: ubuntu" not in bootstrap
+assert "node-pool: ks5-nvme" in bootstrap
+assert "kubernetes.io/arch: amd64" not in bootstrap
 
 external_secret = EXTERNAL_SECRET.read_text()
 assert "secret/skirmshop-drive/synapse-backup-read-v2" in external_secret
