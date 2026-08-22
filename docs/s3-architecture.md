@@ -30,8 +30,8 @@ http://skirmshop-drive-s3.backup-hub.svc.cluster.local:9000
 LAN/Tailscale operator access:
 
 ```text
-https://skirmshop-s3.lan.e-dani.com
-https://skirmshop-s3-console.lan.e-dani.com
+https://skirmshop-s3.e-dani.com
+https://skirmshop-s3-console.e-dani.com
 ```
 
 The LAN routes are limited to the home LAN, Tailscale CGNAT range, and cluster
@@ -110,14 +110,14 @@ AWS CLI can target an S3-compatible endpoint with `--endpoint-url`:
 ```sh
 AWS_ACCESS_KEY_ID=...
 AWS_SECRET_ACCESS_KEY=...
-aws --endpoint-url https://skirmshop-s3.lan.e-dani.com s3 ls s3://skirmshop-drive/
+aws --endpoint-url https://skirmshop-s3.e-dani.com s3 ls s3://skirmshop-drive/
 ```
 
 Rclone can also use MinIO through the S3 backend:
 
 ```sh
 rclone config create skirmshop-s3 s3 provider Minio \
-  endpoint https://skirmshop-s3.lan.e-dani.com \
+  endpoint https://skirmshop-s3.e-dani.com \
   access_key_id "$AWS_ACCESS_KEY_ID" \
   secret_access_key "$AWS_SECRET_ACCESS_KEY"
 rclone lsf skirmshop-s3:skirmshop-drive

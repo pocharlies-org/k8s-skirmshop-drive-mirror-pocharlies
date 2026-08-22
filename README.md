@@ -75,8 +75,8 @@ Cluster services can write to the LAN-only S3 endpoint:
 
 Operators can inspect the same bucket from LAN/Tailscale:
 
-- S3 API: `https://skirmshop-s3.lan.e-dani.com`
-- Console: `https://skirmshop-s3-console.lan.e-dani.com`
+- S3 API: `https://skirmshop-s3.e-dani.com`
+- Console: `https://skirmshop-s3-console.e-dani.com`
 
 The app Secret has also been copied to namespace `skirmshop` for store
 workloads. Secrets are intentionally not stored in these manifests; recreate or
