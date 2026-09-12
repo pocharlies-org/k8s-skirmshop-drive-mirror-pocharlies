@@ -87,6 +87,16 @@ After creating Secrets with `kubectl apply`, remove
 `kubectl.kubernetes.io/last-applied-configuration` from those Secret objects so
 the encoded payload is not retained in object annotations.
 
+The `skirmshop-drive-s3-app` credentials are the exception to the `kubectl`
+flow above: their source of truth is the 1Password item
+`skirmshop-drive-s3-app` (vault `k8s-pocharlies`). A `ClusterExternalSecret`
+reads that item into `skirmshop`, `whatsapp-mcp` and `skirmshop-brain-prod`,
+and the only writer of the item is the MinIO provisioner (`k8s-infra`). Edit
+the item with `op item edit skirmshop-drive-s3-app ... --vault k8s-pocharlies`,
+not by applying a Secret — a hand-applied Secret is overwritten on the next
+refresh. The `ClusterPushSecret` that used to write the item from the seed
+Secret was retired under SC-495.
+
 The MinIO data directory is stored on the same Sauvage-backed PVC under
 `/mirror/s3-data`. The export job copies that bucket to Google Drive every 15
 minutes:
