@@ -47,6 +47,15 @@ spec:
 
               mc ilm rule import "local/${S3_BUCKET}" < /config/s3-lifecycle.json
               mc ilm rule list --expiry "local/${S3_BUCKET}"
+
+              # Backups restic de alphalinkcrossfit.com: bucket y usuario propios,
+              # sin lifecycle (la retención la aplica restic forget en el droplet).
+              mc mb --ignore-existing local/alphalink-backups
+              mc anonymous set none local/alphalink-backups
+              mc admin policy create local alphalink-backup-rw /config/alphalink-backup-policy.json || true
+              mc admin user add local "${ALPHALINK_ACCESS_KEY_ID}" "${ALPHALINK_SECRET_ACCESS_KEY}" || true
+              mc admin policy attach local alphalink-backup-rw --user "${ALPHALINK_ACCESS_KEY_ID}" || true
+              mc admin user info local "${ALPHALINK_ACCESS_KEY_ID}"
           envFrom:
             - configMapRef:
                 name: skirmshop-drive-s3-config
@@ -71,6 +80,16 @@ spec:
                 secretKeyRef:
                   name: skirmshop-drive-s3-app
                   key: AWS_SECRET_ACCESS_KEY
+            - name: ALPHALINK_ACCESS_KEY_ID
+              valueFrom:
+                secretKeyRef:
+                  name: alphalink-backup-s3
+                  key: AWS_ACCESS_KEY_ID
+            - name: ALPHALINK_SECRET_ACCESS_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: alphalink-backup-s3
+                  key: AWS_SECRET_ACCESS_KEY
           volumeMounts:
             - name: policy
               mountPath: /config/s3-policy.json
@@ -79,6 +98,10 @@ spec:
             - name: policy
               mountPath: /config/s3-lifecycle.json
               subPath: s3-lifecycle.json
+              readOnly: true
+            - name: policy
+              mountPath: /config/alphalink-backup-policy.json
+              subPath: alphalink-backup-policy.json
               readOnly: true
           resources:
             requests:
