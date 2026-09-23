@@ -10,6 +10,7 @@ resources:
   - s3-minio.yaml
   - s3-lan-ingressroute.yaml
   - s3-app-externalsecret.yaml
+  - alphalink-backup-externalsecret.yaml
   - s3-bootstrap.yaml
   - s3-to-drive-cronjob.yaml
   - keeper.yaml
@@ -24,6 +25,7 @@ configMapGenerator:
     files:
       - s3-policy.json
       - s3-lifecycle.json
+      - alphalink-backup-policy.json
 
 generatorOptions:
   disableNameSuffixHash: true
