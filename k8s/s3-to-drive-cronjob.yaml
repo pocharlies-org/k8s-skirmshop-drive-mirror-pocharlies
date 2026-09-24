@@ -45,12 +45,12 @@ spec:
                 - name: AWS_ACCESS_KEY_ID
                   valueFrom:
                     secretKeyRef:
-                      name: skirmshop-drive-s3-app
+                      name: skirmshop-drive-s3-to-gdrive
                       key: AWS_ACCESS_KEY_ID
                 - name: AWS_SECRET_ACCESS_KEY
                   valueFrom:
                     secretKeyRef:
-                      name: skirmshop-drive-s3-app
+                      name: skirmshop-drive-s3-to-gdrive
                       key: AWS_SECRET_ACCESS_KEY
               volumeMounts:
                 - name: scripts
