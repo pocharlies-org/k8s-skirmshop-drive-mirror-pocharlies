@@ -14,12 +14,12 @@ Almacenamiento de objetos de Skirmshop y espejo de Google Drive: MinIO interno (
 - Quién escribe el item de 1Password: solo el aprovisionador de MinIO de `k8s-infra`. No editar a mano el Secret.
 
 ## Stack con versiones
-- Kustomize (`namespace: backup-hub`, `configMapGenerator` con `disableNameSuffixHash: true` para `skirmshop-drive-mirror-scripts` y `skirmshop-drive-s3-policy`), MinIO RELEASE.2025-04-22, rclone 1.69.0, scripts `drive-sync.sh` y `s3-to-drive-sync.sh`. Sin Helm.
+- Kustomize (`namespace: backup-hub`, `configMapGenerator` con `disableNameSuffixHash: true` para `skirmshop-drive-mirror-scripts` y `skirmshop-drive-s3-policy`), MinIO RELEASE.2025-04-22, rclone 1.69.0, script `drive-sync.sh`. Sin Helm.
 
 ## Componentes compartidos
 - **El almacén de objetos de Skirmshop** es el componente compartido canónico: endpoint interno `http://skirmshop-drive-s3.backup-hub.svc.cluster.local:9000`, bucket `skirmshop-drive`, región `us-east-1`, path-style, secreto `skirmshop-drive-s3-app`. Estándar de prefijos en `docs/s3-architecture.md` (`skirmbooks/invoicing/`, `invoices/incoming|generated|sii/`, `price-lists/`, `catalog/exports|rag/...`, `media/images|videos|audio/`, `socialmedia/...`, `plugins/<plugin-name>/`).
 - Publica: Service `skirmshop-drive-s3` (9000), rutas LAN del S3 y de la consola, reglas de ciclo de vida (`s3-lifecycle.json`: expiran a 7 días los prefijos `media/images/openclaw/ephemeral/`, `media/images/2026-06/openclaw-ephemeral-` y `media/images/studio/ephemeral/`).
-- Jobs: `skirmshop-drive-mirror` (CronJob 03:10, Drive → PVC, `RCLONE_MODE=sync` con `--backup-dir` en `/mirror/archive/`, filtra `/Facturas/**` y `/skirmshop/**`) y `skirmshop-drive-s3-to-drive` (cada 15 min, `s3://skirmshop-drive/` → Drive `skirmshop/k8s-object-store`, modo `copy`, `S3_TO_DRIVE_BWLIMIT=8M`, `TRANSFERS=4`).
+- Jobs: `skirmshop-drive-mirror` (CronJob 03:10, Drive → PVC, `RCLONE_MODE=sync` con `--backup-dir` en `/mirror/archive/`, filtra `/Facturas/**` y `/skirmshop/**`). El export `skirmshop-drive-s3-to-drive` (S3 → Drive) se retiró el 03-10-2026.
 - Qué NO debe vivir aquí: bases de datos, colas, Redis, NATS ni sesiones de WhatsApp (estado caliente en su almacenamiento nativo).
 
 ## Cómo se construye

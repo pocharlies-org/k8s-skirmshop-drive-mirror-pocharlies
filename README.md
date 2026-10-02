@@ -11,7 +11,6 @@ The stack uses:
 - `rclone/rclone` CronJob
 - internal MinIO service `skirmshop-drive-s3`
 - LAN MinIO API and console routes for operators
-- S3-to-Drive export CronJob `skirmshop-drive-s3-to-drive`
 - existing Kubernetes Secret `backup-hub/gmail-backup-secrets`
 - a tiny keeper Deployment so Velero filesystem backups always see the PVC
 
@@ -93,8 +92,7 @@ flow above: each consumer has its own MinIO user and its own 1Password item
 namespace by the `ClusterExternalSecret` of the same name
 (`k8s/s3-consumer-externalsecrets.yaml`): affiliate, collections-tree, sii and
 skirmbooks in `skirmshop`, brain in `skirmshop-brain-prod`, socialmedia in
-`whatsapp-mcp`, and `skirmshop-drive-s3-to-gdrive` (read-only) for the
-`s3-to-drive` CronJob here. Rotate one with `mc admin user add` on
+`whatsapp-mcp`. Rotate one with `mc admin user add` on
 skirmshop-drive-s3 plus `op item edit skirmshop-drive-s3-<consumer> ...`.
 The shared `skirmshop-drive-s3-app` ClusterExternalSecret was retired on
 24-09-2026; the item and `backup-hub/skirmshop-drive-s3-app` remain only for
