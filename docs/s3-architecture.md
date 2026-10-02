@@ -11,9 +11,10 @@ cluster apps and Synapse adapters
   -> bucket skirmshop-drive
   -> MinIO data on PVC skirmshop-drive-mirror, subPath /mirror/s3-data
   -> nfs-cold on Sauvage
-  -> rclone export every 15 minutes
-  -> Google Drive info@skirmshop.es/skirmshop/k8s-object-store
 ```
+
+The rclone export to Google Drive (`skirmshop/k8s-object-store`, every 15
+minutes) was removed on 2026-10-03.
 
 This is intentionally object storage, not a Kubernetes `StorageClass`.
 Workloads use the S3 API. Databases, queues, Redis, NATS, WhatsApp sessions and

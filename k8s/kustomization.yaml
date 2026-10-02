@@ -12,7 +12,6 @@ resources:
   - s3-consumer-externalsecrets.yaml
   - alphalink-backup-externalsecret.yaml
   - s3-bootstrap.yaml
-  - s3-to-drive-cronjob.yaml
   - keeper.yaml
   - cronjob.yaml
 
@@ -20,7 +19,6 @@ configMapGenerator:
   - name: skirmshop-drive-mirror-scripts
     files:
       - drive-sync.sh
-      - s3-to-drive-sync.sh
   - name: skirmshop-drive-s3-policy
     files:
       - s3-policy.json

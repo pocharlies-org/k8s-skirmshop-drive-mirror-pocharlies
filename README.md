@@ -11,7 +11,6 @@ The stack uses:
 - `rclone/rclone` CronJob
 - internal MinIO service `skirmshop-drive-s3`
 - LAN MinIO API and console routes for operators
-- S3-to-Drive export CronJob `skirmshop-drive-s3-to-drive`
 - existing Kubernetes Secret `backup-hub/gmail-backup-secrets`
 - a tiny keeper Deployment so Velero filesystem backups always see the PVC
 
@@ -93,25 +92,20 @@ flow above: each consumer has its own MinIO user and its own 1Password item
 namespace by the `ClusterExternalSecret` of the same name
 (`k8s/s3-consumer-externalsecrets.yaml`): affiliate, collections-tree, sii and
 skirmbooks in `skirmshop`, brain in `skirmshop-brain-prod`, socialmedia in
-`whatsapp-mcp`, and `skirmshop-drive-s3-to-gdrive` (read-only) for the
-`s3-to-drive` CronJob here. Rotate one with `mc admin user add` on
+`whatsapp-mcp`. Rotate one with `mc admin user add` on
 skirmshop-drive-s3 plus `op item edit skirmshop-drive-s3-<consumer> ...`.
 The shared `skirmshop-drive-s3-app` ClusterExternalSecret was retired on
 24-09-2026; the item and `backup-hub/skirmshop-drive-s3-app` remain only for
 `s3-bootstrap.yaml`.
 
 The MinIO data directory is stored on the same Sauvage-backed PVC under
-`/mirror/s3-data`. The export job copies that bucket to Google Drive every 15
-minutes:
-
-- source: `s3://skirmshop-drive/`
-- destination in Drive: `skirmshop/k8s-object-store`
-- archive path in Drive for overwritten files: `skirmshop/k8s-object-store-archive`
-- default mode: `copy`
-- throttling: `S3_TO_DRIVE_BWLIMIT=8M`, `S3_TO_DRIVE_TRANSFERS=4`
+`/mirror/s3-data`. The bucket is no longer exported to Google Drive: the
+`skirmshop-drive-s3-to-drive` CronJob (every 15 minutes to
+`skirmshop/k8s-object-store`) was removed on 2026-10-03, and what it had copied
+stays in Drive.
 
 Use this for documents, generated files, imports, exports and other artifacts
-that should be durable in Drive. It is not intended for hot databases or
+that should be durable. It is not intended for hot databases or
 high-IO application state.
 
 See:
