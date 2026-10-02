@@ -1,7 +1,7 @@
 # ARCHITECTURE — k8s-skirmshop-drive-mirror-pocharlies
 
 Repo: `pocharlies-org/k8s-skirmshop-drive-mirror-pocharlies` · tronco real: `main` (default branch del survey y `targetRevision` de la Application viva `skirmshop-drive-mirror`) · workflows `ci.yml`, `pr-review.yml`.
-Almacenamiento de objetos de Skirmshop y espejo de Google Drive: MinIO interno (`skirmshop-drive-s3`) con exportación a Drive y copia de Drive a disco. Es una carga de infraestructura, no una app con código propio: **no tiene repo de aplicación** (usa imágenes públicas `rclone/rclone`, `minio/minio`, `busybox` y scripts de shell del propio repo).
+Almacenamiento de objetos de Skirmshop y espejo de Google Drive: MinIO interno (`skirmshop-drive-s3`) y copia de Drive a disco (la exportación S3 → Drive se retiró el 03-10-2026). Es una carga de infraestructura, no una app con código propio: **no tiene repo de aplicación** (usa imágenes públicas `rclone/rclone`, `minio/minio`, `busybox` y scripts de shell del propio repo).
 
 ## Clientes y versiones
 - Sin clientes humanos. Clientes del S3: aplicaciones del clúster y adaptadores de Synapse (contrato en `docs/s3-architecture.md`) y operadores por LAN/Tailscale (`https://skirmshop-s3.e-dani.com`, consola `https://skirmshop-s3-console.e-dani.com`).

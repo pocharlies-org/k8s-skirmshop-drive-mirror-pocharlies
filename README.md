@@ -99,17 +99,13 @@ The shared `skirmshop-drive-s3-app` ClusterExternalSecret was retired on
 `s3-bootstrap.yaml`.
 
 The MinIO data directory is stored on the same Sauvage-backed PVC under
-`/mirror/s3-data`. The export job copies that bucket to Google Drive every 15
-minutes:
-
-- source: `s3://skirmshop-drive/`
-- destination in Drive: `skirmshop/k8s-object-store`
-- archive path in Drive for overwritten files: `skirmshop/k8s-object-store-archive`
-- default mode: `copy`
-- throttling: `S3_TO_DRIVE_BWLIMIT=8M`, `S3_TO_DRIVE_TRANSFERS=4`
+`/mirror/s3-data`. The bucket is no longer exported to Google Drive: the
+`skirmshop-drive-s3-to-drive` CronJob (every 15 minutes to
+`skirmshop/k8s-object-store`) was removed on 2026-10-03, and what it had copied
+stays in Drive.
 
 Use this for documents, generated files, imports, exports and other artifacts
-that should be durable in Drive. It is not intended for hot databases or
+that should be durable. It is not intended for hot databases or
 high-IO application state.
 
 See:
