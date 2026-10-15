@@ -30,6 +30,11 @@ spec:
           nodeSelector:
             kubernetes.io/arch: amd64
             kubernetes.io/hostname: sauvage
+          tolerations:
+            - key: role
+              operator: Equal
+              value: edge
+              effect: NoSchedule
           containers:
             - name: rclone
               image: rclone/rclone:1.69.0

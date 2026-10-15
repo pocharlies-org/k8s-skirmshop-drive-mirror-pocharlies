@@ -23,6 +23,11 @@ spec:
       nodeSelector:
         kubernetes.io/arch: amd64
         kubernetes.io/hostname: sauvage
+      tolerations:
+        - key: role
+          operator: Equal
+          value: edge
+          effect: NoSchedule
       containers:
         - name: keeper
           image: busybox:1.36
