@@ -19,8 +19,7 @@ spec:
       restartPolicy: Never
       nodeSelector:
         kubernetes.io/arch: amd64
-        kubernetes.io/hostname: ubuntu
-        topology: lan
+        kubernetes.io/hostname: sauvage
       containers:
         - name: mc
           # RELEASE.2025-04-16 broke against MinIO server 2025-04-22 ("Content-Length"
