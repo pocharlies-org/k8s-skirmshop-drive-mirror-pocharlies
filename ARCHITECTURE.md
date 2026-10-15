@@ -9,7 +9,7 @@ Almacenamiento de objetos de Skirmshop y espejo de Google Drive: MinIO interno (
 - Imágenes fijadas: `minio/minio:RELEASE.2025-04-22T22-12-26Z`, `rclone/rclone:1.69.0`, `busybox:1.36` (keeper).
 
 ## Dependencias en ambos sentidos
-- Depende de: Google Drive de `info@skirmshop.es` (OAuth, Secret existente `backup-hub/gmail-backup-secrets`), NFS frío de sauvage, Velero (`backup-hub` está en el schedule `daily-x86-critical` con `defaultVolumesToFsBackup`; por eso existe el `keeper`), Traefik (`s3-lan-ingressroute.yaml`, restringido por `ClientIP` a LAN, Tailscale y CIDRs del clúster), ExternalSecrets y 1Password (`s3-app-externalsecret.yaml`: item `skirmshop-drive-s3-app`, vault `k8s-pocharlies`).
+- Depende de: Google Drive de `info@skirmshop.es` (OAuth, Secret existente `backup-hub/gmail-backup-secrets`), NFS frío de sauvage, Velero (`backup-hub` está en el schedule `daily-critical` con `defaultVolumesToFsBackup`; por eso existe el `keeper`), Traefik (`s3-lan-ingressroute.yaml`, restringido por `ClientIP` a LAN, Tailscale y CIDRs del clúster), ExternalSecrets y 1Password (`s3-app-externalsecret.yaml`: item `skirmshop-drive-s3-app`, vault `k8s-pocharlies`).
 - De él dependen (consumidores del bucket `skirmshop-drive`; verificados en el docs del repo y en el CI de los repos de aplicación): `skirmbooks-gestoria-src` y `skirmbooks-drive-ingest` (S3 `skirmshop-drive-it`, prefijo `skirmbooks/invoicing-it`), el cerebro (`skirmshop-brain-v2/src/artifact_s3.py`), socialmedia, los generadores de imagen/vídeo de DGX (`media/images/...`), catálogo RAG y plugins. `ClusterExternalSecret` reparte el secreto de acceso a `skirmshop`, `whatsapp-mcp` y `skirmshop-brain-prod`.
 - Quién escribe el item de 1Password: solo el aprovisionador de MinIO de `k8s-infra`. No editar a mano el Secret.
 
@@ -36,6 +36,8 @@ Almacenamiento de objetos de Skirmshop y espejo de Google Drive: MinIO interno (
 
 ## Decisiones y trampas
 - Evita Longhorn/ks5 a propósito: los datos viven en `nfs-cold` de sauvage, respaldados por Velero con filtrado por FS.
+- [DECISION: INFRA-691: la carga (deployment, keeper, CronJob, bootstrap) va cogida a `kubernetes.io/hostname: sauvage`, junto a los datos. Estando en ubuntu, el montaje NFS hard cruzaba el enlace x86↔sauvage, observado relayado por DERP durante horas → escrituras con cuerpo incompleto y drive fuera de línea (caídas del 07-10 y del 14-10).]
+- Métricas: `MINIO_PROMETHEUS_AUTH_TYPE=public` (solo red del clúster y LAN/tailnet por el ingress restringido; agregados, sin datos de objetos). Las scrapea el VMServiceScrape `skirmshop-drive-s3` y alerta el VMRule homónimo en `dgx-infra` `k8s/monitoring/` (drive offline, errores de escritura, métricas ausentes).
 - `README` indica `kubectl apply -k` desde la ruta local: no usarlo para desplegar (ArgoCD es el dueño; un apply manual la pelea con `selfHeal`).
 - `.gitignore` solo cubre `.env*`, `rendered.yaml`, `tmp/`; en el clon del x86 hay un directorio `.kube/cache/` sin ignorar: el maker NO debe usar `git add -A` (comitear solo `ARCHITECTURE.md`).
 - Los secretos no van en los manifiestos; el Secret de la app S3 es de 1Password/ESO (retirado el `ClusterPushSecret` bajo SC-495): un Secret aplicado a mano se sobrescribe.

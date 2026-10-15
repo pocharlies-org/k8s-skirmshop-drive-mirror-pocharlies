@@ -20,10 +20,14 @@ spec:
         backup.velero.io/backup-volumes-excludes: data
     spec:
       restartPolicy: Always
+      # INFRA-691: cogido con los datos (nfs-cold = sauvage:/srv/nfs/k8s-cold). Estando en
+      # ubuntu, el montaje NFS hard del PVC dependía del enlace x86↔sauvage, que quedó
+      # relayado por DERP durante horas → cuerpos incompletos en las escrituras y el drive
+      # fuera de línea (caídas del 07-10 y del 14-10). El consumidor (telegram-sync) también
+      # vive en sauvage: tras este cambio el enlace tailnet deja de estar en el camino crítico.
       nodeSelector:
         kubernetes.io/arch: amd64
-        kubernetes.io/hostname: ubuntu
-        topology: lan
+        kubernetes.io/hostname: sauvage
       containers:
         - name: minio
           image: harbor.e-dani.com/homelab/minio:RELEASE.2025-04-22T22-12-26Z
@@ -48,6 +52,12 @@ spec:
                   key: MINIO_ROOT_PASSWORD
             - name: MINIO_BROWSER_REDIRECT_URL
               value: https://skirmshop-s3-console.e-dani.com
+            # Métricas de cluster para el VMServiceScrape «skirmshop-drive-s3»
+            # (dgx-infra k8s/monitoring): sin token, asequibles solo desde la red del
+            # clúster y desde LAN/tailnet por el ingress restringido; estadísticas
+            # agregadas, sin datos de objetos ni credenciales.
+            - name: MINIO_PROMETHEUS_AUTH_TYPE
+              value: public
           ports:
             - name: s3
               containerPort: 9000

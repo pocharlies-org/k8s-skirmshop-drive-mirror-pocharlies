@@ -29,8 +29,7 @@ spec:
           restartPolicy: Never
           nodeSelector:
             kubernetes.io/arch: amd64
-            kubernetes.io/hostname: ubuntu
-            topology: lan
+            kubernetes.io/hostname: sauvage
           containers:
             - name: rclone
               image: rclone/rclone:1.69.0
