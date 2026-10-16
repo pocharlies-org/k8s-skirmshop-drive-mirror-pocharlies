@@ -20,6 +20,10 @@ spec:
         backup.velero.io/backup-volumes-excludes: data
     spec:
       restartPolicy: Always
+      # Harbor es privado: sin credenciales el pull 401 (así se atascó el rodillo
+      # a sauvage, INFRA-691). El secret lo mantiene el ExternalSecret harbor-runtime-pull.
+      imagePullSecrets:
+        - name: harbor-pull
       # INFRA-691: cogido con los datos (nfs-cold = sauvage:/srv/nfs/k8s-cold). Estando en
       # ubuntu, el montaje NFS hard del PVC dependía del enlace x86↔sauvage, que quedó
       # relayado por DERP durante horas → cuerpos incompletos en las escrituras y el drive

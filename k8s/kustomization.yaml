@@ -12,6 +12,7 @@ resources:
   - s3-consumer-externalsecrets.yaml
   - alphalink-backup-externalsecret.yaml
   - s3-bootstrap.yaml
+  - harbor-pull-externalsecret.yaml
   - keeper.yaml
   - cronjob.yaml
 
