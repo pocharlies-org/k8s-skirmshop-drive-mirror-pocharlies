@@ -20,6 +20,10 @@ spec:
         backup.velero.io/backup-volumes-excludes: data
     spec:
       restartPolicy: Always
+      # SC-2514: la imagen vive en Harbor desde INFRA-633; sin credencial el kubelet
+      # tira anónimo y falla (ImagePullBackOff en el pod nuevo del 15-10).
+      imagePullSecrets:
+        - name: harbor-pull
       # INFRA-691: cogido con los datos (nfs-cold = sauvage:/srv/nfs/k8s-cold). Estando en
       # ubuntu, el montaje NFS hard del PVC dependía del enlace x86↔sauvage, que quedó
       # relayado por DERP durante horas → cuerpos incompletos en las escrituras y el drive
