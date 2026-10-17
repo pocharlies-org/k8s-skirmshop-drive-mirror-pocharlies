@@ -11,6 +11,7 @@ resources:
   - s3-lan-ingressroute.yaml
   - s3-consumer-externalsecrets.yaml
   - alphalink-backup-externalsecret.yaml
+  - harbor-pull-externalsecret.yaml
   - s3-bootstrap.yaml
   - keeper.yaml
   - cronjob.yaml
