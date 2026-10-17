@@ -25,12 +25,14 @@ spec:
           operator: Equal
           value: edge
           effect: NoSchedule
+      # SC-2514: el digest de Docker Hub ya no existe (repo retirado, como minio/minio
+      # en INFRA-633) y sin credencial el kubelet no podía ni intentarlo. La copia de
+      # Harbor es la mc más reciente disponible (2025-08-13 > 2025-04-16, la rota).
+      imagePullSecrets:
+        - name: harbor-pull
       containers:
         - name: mc
-          # RELEASE.2025-04-16 broke against MinIO server 2025-04-22 ("Content-Length"
-          # error on `mc anonymous set`) — pinned to the mc that passed the full
-          # bootstrap incl. ilm import on 2026-07-06.
-          image: minio/mc@sha256:a7fe349ef4bd8521fb8497f55c6042871b2ae640607cf99d9bede5e9bdf11727
+          image: harbor.e-dani.com/homelab/mc:RELEASE.2025-08-13T08-35-41Z
           imagePullPolicy: IfNotPresent
           command:
             - sh
