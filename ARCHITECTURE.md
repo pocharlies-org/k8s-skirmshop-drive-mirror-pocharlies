@@ -6,7 +6,7 @@ Almacenamiento de objetos de Skirmshop y espejo de Google Drive: MinIO interno (
 ## Clientes y versiones
 - Sin clientes humanos. Clientes del S3: aplicaciones del clúster y adaptadores de Synapse (contrato en `docs/s3-architecture.md`) y operadores por LAN/Tailscale (`https://skirmshop-s3.e-dani.com`, consola `https://skirmshop-s3-console.e-dani.com`).
 - Namespace `backup-hub`; PVC `skirmshop-drive-mirror` en StorageClass `nfs-cold` (`sauvage:/srv/nfs/k8s-cold`).
-- Imágenes fijadas: `minio/minio:RELEASE.2025-04-22T22-12-26Z`, `rclone/rclone:1.69.0`, `busybox:1.36` (keeper).
+- Imágenes fijadas: `harbor.e-dani.com/homelab/minio:RELEASE.2025-04-22T22-12-26Z` (INFRA-633: `minio/minio` retirado de Docker Hub), `harbor.e-dani.com/homelab/mc@sha256:9492e9f…` (INFRA-691: `minio/mc` corrido igual; el espejo es `busybox:1.36` + binario oficial de los releases de GitHub — `dl.min.io` está 410 — construido con `scripts/build-mc-mirror.sh`), `rclone/rclone:1.69.0`, `busybox:1.36` (keeper). Harbor es privado: los pods que lo usan llevan `imagePullSecrets: harbor-pull`, mantenido por el ExternalSecret `harbor-runtime-pull` (item 1Password `infra-harbor-k8s-runtime-pull`, patrón de los demás ns).
 
 ## Dependencias en ambos sentidos
 - Depende de: Google Drive de `info@skirmshop.es` (OAuth, Secret existente `backup-hub/gmail-backup-secrets`), NFS frío de sauvage, Velero (`backup-hub` está en el schedule `daily-critical` con `defaultVolumesToFsBackup`; por eso existe el `keeper`), Traefik (`s3-lan-ingressroute.yaml`, restringido por `ClientIP` a LAN, Tailscale y CIDRs del clúster), ExternalSecrets y 1Password (`s3-app-externalsecret.yaml`: item `skirmshop-drive-s3-app`, vault `k8s-pocharlies`).
