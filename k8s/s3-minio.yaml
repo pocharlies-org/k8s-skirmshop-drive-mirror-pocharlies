@@ -20,8 +20,9 @@ spec:
         backup.velero.io/backup-volumes-excludes: data
     spec:
       restartPolicy: Always
-      # Harbor es privado: sin credenciales el pull 401 (así se atascó el rodillo
-      # a sauvage, INFRA-691). El secret lo mantiene el ExternalSecret harbor-runtime-pull.
+      # Harbor es privado: la imagen vive allí desde INFRA-633 y sin credencial el kubelet
+      # tira anónimo y falla (ImagePullBackOff; SC-2514 añadió esto, INFRA-691 aporta el
+      # secret: el ExternalSecret harbor-runtime-pull de este repo).
       imagePullSecrets:
         - name: harbor-pull
       # INFRA-691: cogido con los datos (nfs-cold = sauvage:/srv/nfs/k8s-cold). Estando en
