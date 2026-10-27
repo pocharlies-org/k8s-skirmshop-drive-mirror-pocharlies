@@ -20,8 +20,9 @@ spec:
         backup.velero.io/backup-volumes-excludes: data
     spec:
       restartPolicy: Always
-      # SC-2514: la imagen vive en Harbor desde INFRA-633; sin credencial el kubelet
-      # tira anónimo y falla (ImagePullBackOff en el pod nuevo del 15-10).
+      # Harbor es privado: la imagen vive allí desde INFRA-633 y sin credencial el kubelet
+      # tira anónimo y falla (ImagePullBackOff; SC-2514 añadió esto, INFRA-691 aporta el
+      # secret: el ExternalSecret harbor-runtime-pull de este repo).
       imagePullSecrets:
         - name: harbor-pull
       # INFRA-691: cogido con los datos (nfs-cold = sauvage:/srv/nfs/k8s-cold). Estando en
