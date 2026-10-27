@@ -4,6 +4,7 @@ kind: Kustomization
 namespace: backup-hub
 
 resources:
+  - harbor-pull-externalsecret.yaml
   - pvc.yaml
   - configmap.yaml
   - s3-config.yaml
@@ -12,7 +13,6 @@ resources:
   - s3-consumer-externalsecrets.yaml
   - alphalink-backup-externalsecret.yaml
   - s3-bootstrap.yaml
-  - harbor-pull-externalsecret.yaml
   - keeper.yaml
   - cronjob.yaml
 

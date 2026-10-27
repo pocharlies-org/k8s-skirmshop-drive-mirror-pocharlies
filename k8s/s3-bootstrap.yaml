@@ -17,8 +17,6 @@ spec:
         app.kubernetes.io/component: s3-bootstrap
     spec:
       restartPolicy: Never
-      imagePullSecrets:
-        - name: harbor-pull
       nodeSelector:
         kubernetes.io/arch: amd64
         kubernetes.io/hostname: sauvage
@@ -27,15 +25,14 @@ spec:
           operator: Equal
           value: edge
           effect: NoSchedule
+      # SC-2514: el digest de Docker Hub ya no existe (repo retirado, como minio/minio
+      # en INFRA-633) y sin credencial el kubelet no podía ni intentarlo. La copia de
+      # Harbor es la mc más reciente disponible (2025-08-13 > 2025-04-16, la rota).
+      imagePullSecrets:
+        - name: harbor-pull
       containers:
         - name: mc
-          # RELEASE.2025-04-16 broke against MinIO server 2025-04-22 ("Content-Length"
-          # error on `mc anonymous set`) — pinned to the mc that passed the full
-          # bootstrap incl. ilm import on 2026-07-06.
-          # minio/mc retirado de Docker Hub (pull 401, como minio/minio — INFRA-633).
-          # Espejo propio en Harbor: busybox:1.36 + binario oficial mc de los releases
-          # de GitHub (dl.min.io también está 410). Ver nota en ARCHITECTURE.md.
-          image: harbor.e-dani.com/homelab/mc@sha256:9492e9f4661723176ce36bf2245592151641d0353dbe3354608c925d3fa0b6bd
+          image: harbor.e-dani.com/homelab/mc:RELEASE.2025-08-13T08-35-41Z
           imagePullPolicy: IfNotPresent
           command:
             - sh
