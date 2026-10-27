@@ -68,6 +68,13 @@ spec:
             # agregadas, sin datos de objetos ni credenciales.
             - name: MINIO_PROMETHEUS_AUTH_TYPE
               value: public
+            # SC-2828 (27-10-2026): el data-scanner de MinIO recorriendo el árbol de
+            # 500 GiB sobre nfs-cold (HDD RAID1 de sauvage) satura el array de IOPS y el
+            # monitor de writability (30 s) sacaba el drive a línea 44 veces al día:
+            # escrituras de los consumidores rechazadas en cada ventana (S3DriveWriteErrors,
+            # Keep CRIT-15923). Con slowest el escáner cede el IOPS a las escrituras.
+            - name: MINIO_SCANNER_SPEED
+              value: slowest
           ports:
             - name: s3
               containerPort: 9000
