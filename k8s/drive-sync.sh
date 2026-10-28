@@ -1,14 +1,13 @@
 #!/bin/sh
 set -eu
 
-if ! command -v jq >/dev/null 2>&1; then
-  if command -v apk >/dev/null 2>&1; then
-    apk add --no-cache jq >/dev/null
-  else
-    echo "jq is required to convert the Google OAuth token into rclone config" >&2
-    exit 1
-  fi
-fi
+# Campos de cadena de token.json, extraídos con sed: sin dependencias externas.
+# El 25-10-2026 el job murió ANTES de rclone porque `apk add jq` no alcanzó la CDN
+# de Alpine (sin log ni manifiesto en /mirror). token.json son campos de cadena
+# OAuth/timestamps (sin comillas ni barras invertidas), sed es suficiente.
+json_field() {
+  sed -n 's/.*"'"$1"'"[[:space:]]*:[[:space:]]*"\([^"]*\)".*/\1/p' "${token_path}" | head -n 1
+}
 
 token_path="/var/run/google/token.json"
 config_path="/config/rclone/rclone.conf"
@@ -22,22 +21,19 @@ filter_file="/config/rclone/filter.rules"
 
 mkdir -p "${current_dir}" "${archive_root}" "${manifest_root}" "${log_root}" /config/rclone
 
-client_id="$(jq -r '.client_id // empty' "${token_path}")"
-client_secret="$(jq -r '.client_secret // empty' "${token_path}")"
-refresh_token="$(jq -r '.refresh_token // empty' "${token_path}")"
-access_token="$(jq -r '.token // .access_token // empty' "${token_path}")"
-expiry="$(jq -r '.expiry // empty' "${token_path}")"
+client_id="$(json_field client_id)"
+client_secret="$(json_field client_secret)"
+refresh_token="$(json_field refresh_token)"
+access_token="$(json_field token)"
+[ -n "${access_token}" ] || access_token="$(json_field access_token)"
+expiry="$(json_field expiry)"
 
 if [ -z "${client_id}" ] || [ -z "${client_secret}" ] || [ -z "${refresh_token}" ]; then
   echo "Google token is missing client_id, client_secret or refresh_token" >&2
   exit 1
 fi
 
-token_json="$(jq -cn \
-  --arg access_token "${access_token}" \
-  --arg refresh_token "${refresh_token}" \
-  --arg expiry "${expiry}" \
-  '{access_token:$access_token, token_type:"Bearer", refresh_token:$refresh_token, expiry:$expiry}')"
+token_json="{\"access_token\":\"${access_token}\",\"token_type\":\"Bearer\",\"refresh_token\":\"${refresh_token}\",\"expiry\":\"${expiry}\"}"
 
 {
   printf '[%s]\n' "${remote_name}"
