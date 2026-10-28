@@ -25,6 +25,7 @@ configMapGenerator:
       - s3-policy.json
       - s3-lifecycle.json
       - alphalink-backup-policy.json
+      - omnivoice-assets-policy.json
 
 generatorOptions:
   disableNameSuffixHash: true
