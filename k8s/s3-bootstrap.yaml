@@ -73,6 +73,16 @@ spec:
               mc admin policy create local omnivoice-assets-rw /config/omnivoice-assets-policy.json || true
               mc admin policy attach local omnivoice-assets-rw --user socialmedia
               mc admin user info local socialmedia
+
+              # SC-4759: el inbox móvil del dashboard (POST /api/app/inbox) sólo escribe
+              # bajo personal/inbox/: identidad propia con política recortada, no la
+              # clave compartida `app` (skirmshop-drive-rw cubre el bucket entero y la
+              # usan el mirror-to-drive, skirmbooks y el brain). Si falta el item
+              # skirmshop-drive-s3-inbox el Job falla a propósito: queda visible.
+              mc admin policy create local skirmshop-drive-inbox-rw /config/s3-policy-inbox.json || true
+              mc admin user add local "${INBOX_ACCESS_KEY_ID}" "${INBOX_SECRET_ACCESS_KEY}" || true
+              mc admin policy attach local skirmshop-drive-inbox-rw --user "${INBOX_ACCESS_KEY_ID}"
+              mc admin user info local "${INBOX_ACCESS_KEY_ID}"
           envFrom:
             - configMapRef:
                 name: skirmshop-drive-s3-config
@@ -107,6 +117,16 @@ spec:
                 secretKeyRef:
                   name: alphalink-backup-s3
                   key: AWS_SECRET_ACCESS_KEY
+            - name: INBOX_ACCESS_KEY_ID
+              valueFrom:
+                secretKeyRef:
+                  name: skirmshop-drive-s3-inbox
+                  key: AWS_ACCESS_KEY_ID
+            - name: INBOX_SECRET_ACCESS_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: skirmshop-drive-s3-inbox
+                  key: AWS_SECRET_ACCESS_KEY
           volumeMounts:
             - name: policy
               mountPath: /config/s3-policy.json
@@ -123,6 +143,10 @@ spec:
             - name: policy
               mountPath: /config/omnivoice-assets-policy.json
               subPath: omnivoice-assets-policy.json
+              readOnly: true
+            - name: policy
+              mountPath: /config/s3-policy-inbox.json
+              subPath: s3-policy-inbox.json
               readOnly: true
           resources:
             requests:
