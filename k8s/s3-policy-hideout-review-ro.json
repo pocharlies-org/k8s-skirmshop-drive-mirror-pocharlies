@@ -4,7 +4,15 @@
     {
       "Effect": "Allow",
       "Action": [
-        "s3:GetBucketLocation",
+        "s3:GetBucketLocation"
+      ],
+      "Resource": [
+        "arn:aws:s3:::skirmshop-drive"
+      ]
+    },
+    {
+      "Effect": "Allow",
+      "Action": [
         "s3:ListBucket"
       ],
       "Resource": [
