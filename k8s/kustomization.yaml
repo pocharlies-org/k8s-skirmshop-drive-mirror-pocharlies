@@ -13,6 +13,7 @@ resources:
   - s3-consumer-externalsecrets.yaml
   - alphalink-backup-externalsecret.yaml
   - s3-inbox-externalsecret.yaml
+  - s3-bundles-externalsecret.yaml
   - s3-bootstrap.yaml
   - keeper.yaml
   - cronjob.yaml
@@ -28,6 +29,8 @@ configMapGenerator:
       - alphalink-backup-policy.json
       - omnivoice-assets-policy.json
       - s3-policy-inbox.json
+      - s3-policy-hideout-review-ro.json
+      - s3-policy-hideout-review-upload.json
 
 generatorOptions:
   disableNameSuffixHash: true

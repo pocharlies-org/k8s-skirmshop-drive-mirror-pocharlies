@@ -83,6 +83,21 @@ spec:
               mc admin user add local "${INBOX_ACCESS_KEY_ID}" "${INBOX_SECRET_ACCESS_KEY}" || true
               mc admin policy attach local skirmshop-drive-inbox-rw --user "${INBOX_ACCESS_KEY_ID}"
               mc admin user info local "${INBOX_ACCESS_KEY_ID}"
+
+              # SKIRM-478: bundles de revisión privada (hideout-review, SKIRM-470). Dos
+              # identidades acotadas al prefijo hideout-review/*, ambas sin DeleteObject
+              # (los paquetes publicados se versionan, no se borran): la de runtime es de
+              # SOLO LECTURA (la usa el initContainer rclone del overlay private-review);
+              # la de carga sólo escribe. Si falta alguno de los dos items de 1Password el
+              # Job falla a propósito: queda visible.
+              mc admin policy create local skirmshop-drive-hideout-review-ro /config/s3-policy-hideout-review-ro.json || true
+              mc admin user add local "${BUNDLES_ACCESS_KEY_ID}" "${BUNDLES_SECRET_ACCESS_KEY}" || true
+              mc admin policy attach local skirmshop-drive-hideout-review-ro --user "${BUNDLES_ACCESS_KEY_ID}"
+              mc admin user info local "${BUNDLES_ACCESS_KEY_ID}"
+              mc admin policy create local skirmshop-drive-hideout-review-upload /config/s3-policy-hideout-review-upload.json || true
+              mc admin user add local "${BUNDLES_UPLOAD_ACCESS_KEY_ID}" "${BUNDLES_UPLOAD_SECRET_ACCESS_KEY}" || true
+              mc admin policy attach local skirmshop-drive-hideout-review-upload --user "${BUNDLES_UPLOAD_ACCESS_KEY_ID}"
+              mc admin user info local "${BUNDLES_UPLOAD_ACCESS_KEY_ID}"
           envFrom:
             - configMapRef:
                 name: skirmshop-drive-s3-config
@@ -127,6 +142,26 @@ spec:
                 secretKeyRef:
                   name: skirmshop-drive-s3-inbox
                   key: AWS_SECRET_ACCESS_KEY
+            - name: BUNDLES_ACCESS_KEY_ID
+              valueFrom:
+                secretKeyRef:
+                  name: skirmshop-drive-s3-bundles
+                  key: AWS_ACCESS_KEY_ID
+            - name: BUNDLES_SECRET_ACCESS_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: skirmshop-drive-s3-bundles
+                  key: AWS_SECRET_ACCESS_KEY
+            - name: BUNDLES_UPLOAD_ACCESS_KEY_ID
+              valueFrom:
+                secretKeyRef:
+                  name: skirmshop-drive-s3-bundles-upload
+                  key: AWS_ACCESS_KEY_ID
+            - name: BUNDLES_UPLOAD_SECRET_ACCESS_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: skirmshop-drive-s3-bundles-upload
+                  key: AWS_SECRET_ACCESS_KEY
           volumeMounts:
             - name: policy
               mountPath: /config/s3-policy.json
@@ -147,6 +182,14 @@ spec:
             - name: policy
               mountPath: /config/s3-policy-inbox.json
               subPath: s3-policy-inbox.json
+              readOnly: true
+            - name: policy
+              mountPath: /config/s3-policy-hideout-review-ro.json
+              subPath: s3-policy-hideout-review-ro.json
+              readOnly: true
+            - name: policy
+              mountPath: /config/s3-policy-hideout-review-upload.json
+              subPath: s3-policy-hideout-review-upload.json
               readOnly: true
           resources:
             requests:
