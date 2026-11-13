@@ -1,0 +1,35 @@
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Effect": "Allow",
+      "Action": [
+        "s3:GetBucketLocation",
+        "s3:ListBucket",
+        "s3:ListBucketMultipartUploads"
+      ],
+      "Resource": [
+        "arn:aws:s3:::skirmshop-drive"
+      ],
+      "Condition": {
+        "StringLike": {
+          "s3:prefix": [
+            "hideout-review",
+            "hideout-review/*"
+          ]
+        }
+      }
+    },
+    {
+      "Effect": "Allow",
+      "Action": [
+        "s3:AbortMultipartUpload",
+        "s3:ListMultipartUploadParts",
+        "s3:PutObject"
+      ],
+      "Resource": [
+        "arn:aws:s3:::skirmshop-drive/hideout-review/*"
+      ]
+    }
+  ]
+}
