@@ -91,8 +91,8 @@ flow above: each consumer has its own MinIO user and its own 1Password item
 `skirmshop-drive-s3-<consumer>` (vault `k8s-pocharlies`), read into its
 namespace by the `ClusterExternalSecret` of the same name
 (`k8s/s3-consumer-externalsecrets.yaml`): affiliate, collections-tree, sii and
-skirmbooks in `skirmshop`, brain in `skirmshop-brain-prod`, socialmedia in
-`whatsapp-mcp`. Rotate one with `mc admin user add` on
+skirmbooks in `skirmshop`, socialmedia in `whatsapp-mcp` (the brain consumer in
+`skirmshop-brain-prod` was retired with the Brain on SC-5827). Rotate one with `mc admin user add` on
 skirmshop-drive-s3 plus `op item edit skirmshop-drive-s3-<consumer> ...`.
 The shared `skirmshop-drive-s3-app` ClusterExternalSecret was retired on
 24-09-2026; the item and `backup-hub/skirmshop-drive-s3-app` remain only for

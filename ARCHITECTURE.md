@@ -10,7 +10,7 @@ Almacenamiento de objetos de Skirmshop y espejo de Google Drive: MinIO interno (
 
 ## Dependencias en ambos sentidos
 - Depende de: Google Drive de `info@skirmshop.es` (OAuth, Secret existente `backup-hub/gmail-backup-secrets`), NFS frío de sauvage, Velero (`backup-hub` está en el schedule `daily-critical` con `defaultVolumesToFsBackup`; por eso existe el `keeper`), Traefik (`s3-lan-ingressroute.yaml`, restringido por `ClientIP` a LAN, Tailscale y CIDRs del clúster), ExternalSecrets y 1Password (`s3-app-externalsecret.yaml`: item `skirmshop-drive-s3-app`, vault `k8s-pocharlies`).
-- De él dependen (consumidores del bucket `skirmshop-drive`; verificados en el docs del repo y en el CI de los repos de aplicación): `skirmbooks-gestoria-src` y `skirmbooks-drive-ingest` (S3 `skirmshop-drive-it`, prefijo `skirmbooks/invoicing-it`), el cerebro (`skirmshop-brain-v2/src/artifact_s3.py`), socialmedia, los generadores de imagen/vídeo de DGX (`media/images/...`), catálogo RAG y plugins. `ClusterExternalSecret` reparte el secreto de acceso a `skirmshop`, `whatsapp-mcp` y `skirmshop-brain-prod`.
+- De él dependen (consumidores del bucket `skirmshop-drive`; verificados en el docs del repo y en el CI de los repos de aplicación): `skirmbooks-gestoria-src` y `skirmbooks-drive-ingest` (S3 `skirmshop-drive-it`, prefijo `skirmbooks/invoicing-it`), socialmedia, los generadores de imagen/vídeo de DGX (`media/images/...`), catálogo RAG (rag-app) y plugins. `ClusterExternalSecret` reparte el secreto de acceso a `skirmshop` y `whatsapp-mcp` (el del Brain se retiró con él, SC-5827).
 - Quién escribe el item de 1Password: solo el aprovisionador de MinIO de `k8s-infra`. No editar a mano el Secret.
 
 ## Stack con versiones
@@ -44,7 +44,7 @@ Almacenamiento de objetos de Skirmshop y espejo de Google Drive: MinIO interno (
 - El docs `storage-audit-2026-06-07.md` es una auditoría fechada; no es estado vigente.
 
 ## Referencias cruzadas
-- Consumidores: `skirmshop-brain-v2` (`src/artifact_s3.py`), `skirmbooks-drive-ingest` (`scripts/s3-artifacts.mjs`), `skirmbooks-gestoria-src`; infra: `k8s-infra-pocharlies` (aprovisionador de MinIO), Velero.
+- Consumidores: `skirmbooks-drive-ingest` (`scripts/s3-artifacts.mjs`), `skirmbooks-gestoria-src`; infra: `k8s-infra-pocharlies` (aprovisionador de MinIO), Velero.
 - [DECISION: k8s-skirmshop-drive-mirror-pocharlies: el almacén de objetos canónico de Skirmshop es el MinIO skirmshop-drive-s3 (bucket skirmshop-drive) de este chart]
 
 ## Hallazgo C5
